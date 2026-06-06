@@ -1,4 +1,5 @@
 import asyncio
+from dataclasses import asdict
 import json
 import websockets
 import time
@@ -37,8 +38,8 @@ async def handle_client(websocket: websockets.ServerConnection):
                 if data["type"] == ClientMessageType.PLAYER_MOVE:
                     # Send opponent this players position
                     print("Received client message: " + json.dumps(data))
-                    message = OpponentMove(y_position=data["y_position"])
-                    await opp.send(json.dumps(message))
+                    outgoing_message = OpponentMove(y_position=data["y_position"])
+                    await opp.send(json.dumps(asdict(outgoing_message)))
             elif len(players) == 1:
                 # TODO Waiting for players
                 pass
