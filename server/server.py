@@ -1,10 +1,8 @@
 import asyncio
-from dataclasses import asdict
-import json
-import websockets
 import time
+import websockets
 
-from common.Enums import ClientMessageType, OpponentMove
+from common.messages import OpponentMove, PlayerMove, deserialize_message, serialize_message
 
 PLAYER_PADDLE_SPEED = 50
 BALL_SPEED = 75
@@ -31,15 +29,13 @@ async def handle_client(websocket: websockets.ServerConnection):
     # Main game loop
     try:
         async for message in websocket:
-            print("Received client message: " + json.dumps(json.loads(message)))
+            parsed = deserialize_message(str(message))
+            print("Received client message: " + parsed.to_json())
             if len(players) == 2:
-                data = json.loads(message)
                 opp: websockets.ServerConnection = next(p for p in players if p != websocket)
-                if data["type"] == ClientMessageType.PLAYER_MOVE:
-                    # Send opponent this players position
-                    print("Received client message: " + json.dumps(data))
-                    outgoing_message = OpponentMove(y_position=data["y_position"])
-                    await opp.send(json.dumps(asdict(outgoing_message)))
+                if isinstance(parsed, PlayerMove):
+                    outgoing_message = OpponentMove(y_position=parsed.y_position)
+                    await opp.send(serialize_message(outgoing_message))
             elif len(players) == 1:
                 # TODO Waiting for players
                 pass
