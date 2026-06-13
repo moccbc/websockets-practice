@@ -3,19 +3,38 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Any, ClassVar, Dict, Type
 
-class BaseMessage:
-    pass
-
 MESSAGES = {}
 
 def message(tag):
     def wrap(clazz):
+        print(clazz)
         clazz.type = tag
         MESSAGES[tag] = clazz
         return clazz
     return wrap
 
-def encode(msg: BaseMessage): 
+# Goes from client -> server
+@message("join")
+@dataclass
+class Join:
+    pass
+
+@message("move")
+@dataclass
+class Move:
+    player_id: str
+    dx: float
+    dy: float
+
+# Goes from server -> client
+@message("game_ready")
+@dataclass
+class GameReady:
+    pass
+
+Message = Join | Move | GameReady
+
+def encode(msg: Message): 
     return json.dumps({"type": msg.type, **asdict(msg)})
 
 def decode(raw):
@@ -23,20 +42,3 @@ def decode(raw):
     clazz = MESSAGES[data.pop("type")]
     return clazz(**data)
     
-# Goes from client -> server
-@message("join")
-@dataclass
-class Join(BaseMessage):
-    pass
-
-@message("move")
-@dataclass
-class Move(BaseMessage):
-    player_id: str
-    dx: float
-    dy: float
-
-@message("GameReady")
-@dataclass
-class GameReady(BaseMessage):
-    pass

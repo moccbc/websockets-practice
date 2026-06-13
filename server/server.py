@@ -3,7 +3,7 @@ import time
 import websockets
 
 from common import messages
-from common.messages import Move, Join
+from common.messages import Move, Join, GameReady
 
 PLAYER_PADDLE_SPEED = 50
 BALL_SPEED = 75
