@@ -23,8 +23,7 @@ class Join:
 @dataclass
 class Move:
     player_id: int
-    dx: float
-    dy: float
+    y: int
 
 # Goes from server -> client
 @message("game_ready")
@@ -32,7 +31,19 @@ class Move:
 class GameReady:
     pass
 
-Message = Join | Move | GameReady
+@message("player_move")
+@dataclass
+class PlayerMove:
+    player_id: int
+    dy: float
+
+@message("ball_move")
+@dataclass
+class BallMove:
+    player_id: int
+    dy: float
+
+Message = Join | Move | GameReady | PlayerMove | BallMove
 
 def encode(msg: Message): 
     return json.dumps({"type": msg.type, **asdict(msg)})
