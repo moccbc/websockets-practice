@@ -2,8 +2,10 @@ import asyncio
 from websockets.sync.client import connect
 
 import pygame
-from states.state import State
-from ui.button import Button
+from client.states.state import State
+from client.ui.button import Button
+from common import messages
+from common.messages import Move
 
 class MenuState(State):
     def __init__(self, game):
@@ -20,4 +22,5 @@ class MenuState(State):
 
     def connect_to_server(self):
         self.game.connection = connect("ws://localhost:32231")
-        self.game.connection.send('{"type": "playerMove", "y_position": 50, "farts":"100"}')
+        message = messages.encode(Move(0, 10, 10))
+        self.game.connection.send(message)

@@ -1,5 +1,5 @@
 import pygame
-from states.state import State
+from client.states.state import State
 
 class Game:
     def __init__(self):
