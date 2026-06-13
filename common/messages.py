@@ -22,7 +22,7 @@ class Join:
 @message("move")
 @dataclass
 class Move:
-    player_id: str
+    player_id: int
     dx: float
     dy: float
 
