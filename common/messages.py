@@ -5,6 +5,18 @@ from typing import Any, ClassVar, Dict, Type
 
 MESSAGES = {}
 
+class MessageError(Exception):
+    """Base class for message encode/decode failures."""
+    pass
+
+class EncodeError(MessageError):
+    """Raised when a message fails to encode."""
+    pass
+
+class DecodeError(MessageError):
+    """Raised when raw data fails to decode into a message."""
+    pass
+
 def message(tag):
     def wrap(clazz):
         clazz.type = tag
@@ -23,12 +35,6 @@ class Join:
 class Move:
     player_id: int
     y: int
-
-@message("player_move")
-@dataclass
-class PlayerMove:
-    player_id: int
-    dy: float
 
 # Goes from server -> client
 @message("join_response")
@@ -54,13 +60,19 @@ class BallPosition:
     x: float
     y: float
 
-Message = Join | JoinResponse | Move | GameReady | PlayerMove | PaddlePosition | BallPosition
+Message = Join | JoinResponse | Move | GameReady | PaddlePosition | BallPosition
 
-def encode(msg: Message): 
-    return json.dumps({"type": msg.type, **asdict(msg)})
+def encode(msg: Message):
+    try:
+        return json.dumps({"type": msg.type, **asdict(msg)})
+    except (AttributeError, TypeError) as exc:
+        raise EncodeError(f"Failed to encode {msg!r}") from exc
 
 def decode(raw):
-    data = json.loads(raw)
-    clazz = MESSAGES[data.pop("type")]
-    return clazz(**data)
+    try:
+        data = json.loads(raw)
+        clazz = MESSAGES[data.pop("type")]
+        return clazz(**data)
+    except (json.JSONDecodeError, KeyError, TypeError) as exc:
+        raise DecodeError(f"Failed to decode {raw!r}") from exc
     
