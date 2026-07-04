@@ -1,4 +1,5 @@
 import asyncio
+import random
 import time
 import websockets
 
@@ -7,6 +8,7 @@ from common.messages import Move, Join, GameReady, JoinResponse, PaddlePosition,
 
 PLAYER_PADDLE_SPEED = 0.5
 BALL_SPEED = 75
+GAME_SPEED = 1/30
 
 """
 Player data structure: {ws: websocket, 'id': int, 'y': int}
@@ -24,7 +26,17 @@ class Player:
 players: dict[int, Player] = {}
 
 async def game_loop():
+    ball_x = 400
+    ball_y = 300
+    dx = random.uniform(-1, 1)
+    dy = random.uniform(-1, 1)
+    magnitude = (dx * dx + dy * dy) ** 0.5
+    ball_direction = (dx / magnitude, dy / magnitude)
+
     while True:
+        ball_x += ball_direction[0] * BALL_SPEED * GAME_SPEED
+        ball_y += ball_direction[1] * BALL_SPEED * GAME_SPEED
+
         for player_id, player in players.items():
             for player_id2, player2 in players.items():
                 paddle_position_message = messages.encode(
@@ -32,13 +44,13 @@ async def game_loop():
                 await player2.ws.send(paddle_position_message)
 
                 ball_position_message = messages.encode(
-                        BallPosition(player.x, player.y))
+                        BallPosition(ball_x, ball_y))
                 await player2.ws.send(ball_position_message)
 
         # This is needed so that the game_loop and the async for loop in handle_client can share
         # the resources so that handle_client can actually send and receive stuff to and from 
         # the client
-        await asyncio.sleep(1/30)
+        await asyncio.sleep(GAME_SPEED)
 
 async def handle_client(websocket: websockets.ServerConnection):
     global players
