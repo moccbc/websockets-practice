@@ -56,7 +56,7 @@ class PlayState(State):
             elif event.key == pygame.K_DOWN:
                 self.local_down = False
 
-    def handle_message(self, message):
+    def on_message(self, message):
         match message:
             case GameReady():
                 self.ready = True
@@ -74,13 +74,13 @@ class PlayState(State):
     def update(self, dt):
         # Handle messages sent to server for this tick
         
-        if self.game.connection is None:
-            return
+        #if self.game.connection is None:
+        #    return
         
         if self.local_down or self.local_up:
             direction = self.local_up - self.local_down
-            message = messages.encode(Move(self.player_id, direction))
-            self.game.send_queue.put(message)
+            #message = messages.encode(Move(self.player_id, direction))
+            self.game.network_client.send(Move(self.player_id, direction))
 
     def draw(self, screen):
         screen.fill((20, 20, 40))
@@ -113,8 +113,8 @@ class PlayState(State):
         lines.append("Local paddle controls: W/S or Up/Down")
         if getattr(self.game, 'local_test', False):
             lines.append("Mode: Local test (no server)")
-        else:
-            lines.append("Mode: Online" if self.game.is_connected else "Mode: Offline")
+        #else:
+        #    lines.append("Mode: Online" if self.game.is_connected else "Mode: Offline")
         # show player id if available
         pid = getattr(self.game, 'player_id', None)
         if pid is not None:

@@ -32,7 +32,7 @@ async def game_loop():
                 await player2.ws.send(paddle_position_message)
 
                 ball_position_message = messages.encode(
-                        BallPosition(player_id, player.x, player.y))
+                        BallPosition(player.x, player.y))
                 await player2.ws.send(ball_position_message)
 
         # This is needed so that the game_loop and the async for loop in handle_client can share
@@ -51,14 +51,14 @@ async def handle_client(websocket: websockets.ServerConnection):
         # this line is equivalent to while True: message = await websocket.recv()
         async for raw_message in websocket:
             message = messages.decode(raw_message)
-            print(f"Received client message: {message}")
 
             match message:
                 case Join():
                     await websocket.send(messages.encode(JoinResponse(player_id)))
 
                     if len(players) == 2:
-                        for player in players.items():
+                        print(players)
+                        for player_id, player in players.items():
                             ready_message = messages.encode(GameReady())
                             await player.ws.send(ready_message)
                             asyncio.create_task(game_loop())
