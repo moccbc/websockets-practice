@@ -21,9 +21,9 @@ class PlayState(State):
         self.local_up = False
         self.local_down = False
         self.paddle_x = 30
-        self.remote_paddle_x = SCREEN_WIDTH - 30 - PADDLE_WIDTH
         self.paddle_y = (SCREEN_HEIGHT - PADDLE_HEIGHT) / 2
-        self.remote_paddle_y = (SCREEN_HEIGHT - PADDLE_HEIGHT) / 2
+        self.opponent_paddle_x = SCREEN_WIDTH - 30 - PADDLE_WIDTH
+        self.opponent_paddle_y = (SCREEN_HEIGHT - PADDLE_HEIGHT) / 2
         self.ball_x = SCREEN_WIDTH / 2
         self.ball_y = SCREEN_HEIGHT / 2
         self.score_left = 0
@@ -60,9 +60,13 @@ class PlayState(State):
         match message:
             case GameReady():
                 self.ready = True
-            case PaddlePosition():
-                self.paddle_y = message.y
-                self.paddle_x = message.x
+            case PaddlePosition(player_id, x, y):
+                if player_id == self.player_id:
+                    self.paddle_x = x
+                    self.paddle_y = y
+                else:
+                    self.opponent_paddle_x = x
+                    self.opponent_paddle_y = y
                 pass
             case Exception():
                 from client.states.menustate import MenuState
@@ -86,7 +90,7 @@ class PlayState(State):
         screen.fill((20, 20, 40))
         self.draw_center_line(screen)
         pygame.draw.rect(screen, (255, 255, 255), (self.paddle_x, self.paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT))
-        pygame.draw.rect(screen, (255, 255, 255), (self.remote_paddle_x, self.remote_paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT))
+        pygame.draw.rect(screen, (255, 255, 255), (self.opponent_paddle_x, self.opponent_paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT))
         pygame.draw.circle(screen, (255, 255, 255), (int(self.ball_x), int(self.ball_y)), BALL_RADIUS)
         self.draw_scores(screen)
         self.draw_status(screen)
