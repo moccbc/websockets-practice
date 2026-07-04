@@ -131,8 +131,8 @@ class PlayState(State):
     def disconnect(self):
         # invoked by Back button: close network and return to menu
         try:
-            if self.game.is_connected and self.game.connection is not None:
-                self.game.close_connection()
+            if self.game.network_client._thread:
+                self.game.network_client.stop_network_receiver()
         except Exception:
             pass
         # clear local_test flag

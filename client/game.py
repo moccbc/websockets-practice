@@ -21,6 +21,9 @@ class Game:
         self.state = state
 
     def run(self):
+        if self.state is None:
+            raise(Exception("State should not be none"))
+
         while self.running:
             dt = self.clock.tick(60) / 1000.0
 

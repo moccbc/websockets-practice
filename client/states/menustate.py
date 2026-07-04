@@ -17,8 +17,8 @@ class MenuState(State):
         self.testButton = Button((150, 200, 120, 50), "Test Controls", self.test_controls)
         self.error_message = ""
 
-    def handle_message(self, msg):
-        match msg:
+    def handle_message(self, message):
+        match message:
             case JoinResponse(player_id):
                 self.game.player_id = player_id
                 self.game.change_state(WaitingState(self.game))
@@ -48,6 +48,5 @@ class MenuState(State):
     def test_controls(self):
 
         # Ensure we're in local-test mode
-        self.game.is_connected = False
         self.game.local_test = True
         self.game.change_state(PlayState(self.game))

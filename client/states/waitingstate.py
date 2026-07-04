@@ -9,8 +9,8 @@ class WaitingState(State):
         self.font = pygame.font.SysFont(None, 48)
         self.text_surface = self.font.render("Waiting for another player", True, (255, 255, 255))
 
-    def handle_message(self, msg):
-        match msg:
+    def handle_message(self, message):
+        match message:
             case GameReady():
                 self.game.change_state(PlayState(self.game))
 
