@@ -9,6 +9,9 @@ from common.messages import Move, Join, GameReady, JoinResponse, PaddlePosition,
 PLAYER_PADDLE_SPEED = 0.5
 BALL_SPEED = 75
 GAME_SPEED = 1/30
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+BALL_RADIUS = 8
 
 """
 Player data structure: {ws: websocket, 'id': int, 'y': int}
@@ -36,6 +39,20 @@ async def game_loop():
     while True:
         ball_x += ball_direction[0] * BALL_SPEED * GAME_SPEED
         ball_y += ball_direction[1] * BALL_SPEED * GAME_SPEED
+
+        if ball_y - BALL_RADIUS <= 0:
+            ball_y = BALL_RADIUS
+            ball_direction = (ball_direction[0], -ball_direction[1])
+        elif ball_y + BALL_RADIUS >= SCREEN_HEIGHT:
+            ball_y = SCREEN_HEIGHT - BALL_RADIUS
+            ball_direction = (ball_direction[0], -ball_direction[1])
+
+        if ball_x - BALL_RADIUS <= 0:
+            ball_x = BALL_RADIUS
+            ball_direction = (-ball_direction[0], ball_direction[1])
+        elif ball_x + BALL_RADIUS >= SCREEN_WIDTH:
+            ball_x = SCREEN_WIDTH - BALL_RADIUS
+            ball_direction = (-ball_direction[0], ball_direction[1])
 
         for player_id, player in players.items():
             for player_id2, player2 in players.items():
