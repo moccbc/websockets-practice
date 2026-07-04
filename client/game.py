@@ -25,7 +25,7 @@ class Game:
             dt = self.clock.tick(60) / 1000.0
 
             for msg in self.network_client.poll():
-                self.state.on_message(msg)
+                self.state.handle_message(msg)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

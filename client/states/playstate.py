@@ -56,7 +56,7 @@ class PlayState(State):
             elif event.key == pygame.K_DOWN:
                 self.local_down = False
 
-    def on_message(self, message):
+    def handle_message(self, message):
         match message:
             case GameReady():
                 self.ready = True

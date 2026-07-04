@@ -17,7 +17,7 @@ class MenuState(State):
         self.testButton = Button((150, 200, 120, 50), "Test Controls", self.test_controls)
         self.error_message = ""
 
-    def on_message(self, msg):
+    def handle_message(self, msg):
         match msg:
             case JoinResponse(player_id):
                 self.game.player_id = player_id
