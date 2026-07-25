@@ -6,7 +6,7 @@ import websockets
 from common import messages
 from common.messages import Move, Join, GameReady, JoinResponse, ScoreUpdate, BallObject, PaddleObject
 
-PLAYER_PADDLE_SPEED = 1
+PLAYER_PADDLE_SPEED = 2
 BALL_SPEED = 75
 GAME_SPEED = 1/30
 SCREEN_WIDTH = 800
@@ -14,6 +14,11 @@ SCREEN_HEIGHT = 600
 
 PADDLE_WIDTH = 10
 PADDLE_HEIGHT = 100
+
+PLAYER_ONE_PADDLE_INIT_X = 25
+PLAYER_ONE_PADDLE_INIT_Y = SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2
+PLAYER_TWO_PADDLE_INIT_X = SCREEN_WIDTH - PLAYER_ONE_PADDLE_INIT_X - PADDLE_WIDTH
+PLAYER_TWO_PADDLE_INIT_Y = PLAYER_ONE_PADDLE_INIT_Y 
 
 BALL_RADIUS = 8
 
@@ -29,7 +34,7 @@ class Player:
         self.id = id
         self.x = x
         self.y = y
-        
+
 players: dict[int, Player] = {}
 
 def reset_ball():
@@ -43,9 +48,27 @@ def reset_ball():
         if magnitude > 0:
             return ball_x, ball_y, (dx / magnitude, dy / magnitude)
 
-def advance_ball(ball_x, ball_y, ball_direction, score_left, score_right):
+def check_collision_with_paddle(ball_x, ball_y, player):
+    # Check collision with Player1 (left) paddle
+    if player.id == 0 and (ball_x - BALL_RADIUS <= player.x + PADDLE_WIDTH) and \
+        (player.y <= ball_y <= player.y + PADDLE_HEIGHT):
+        return True 
+
+    # Check collision with Player2 (right) paddle
+    if player.id == 1 and (ball_x + BALL_RADIUS >= player.x) and \
+        (player.y <= ball_y <= player.y + PADDLE_HEIGHT):
+        return True
+
+    return False 
+
+def advance_ball(ball_x, ball_y, ball_direction, score_left, score_right, player):
     ball_x += ball_direction[0] * BALL_SPEED * GAME_SPEED
     ball_y += ball_direction[1] * BALL_SPEED * GAME_SPEED
+
+    # Checking if it collided with a player's paddle
+    if check_collision_with_paddle(ball_x, ball_y, player):
+        ball_direction = (-ball_direction[0], ball_direction[1])
+        return ball_x, ball_y, ball_direction, score_left, score_right
 
     # When the ball is out of bounds (OOB) of the top of the screen
     if ball_y - BALL_RADIUS <= 0:
@@ -74,15 +97,16 @@ async def game_loop():
     score_right = 0
 
     while True:
-        ball_x, ball_y, ball_direction, score_left, score_right = advance_ball(
-            ball_x,
-            ball_y,
-            ball_direction,
-            score_left,
-            score_right,
-        )
-
         for player_id, player in players.items():
+            ball_x, ball_y, ball_direction, score_left, score_right = advance_ball(
+                ball_x,
+                ball_y,
+                ball_direction,
+                score_left,
+                score_right,
+                player
+            )
+
             # First, update score if applicable
             score_message = messages.encode(ScoreUpdate(score_left, score_right))
             await player.ws.send(score_message)
@@ -103,7 +127,7 @@ async def handle_client(websocket: websockets.ServerConnection):
     global players
 
     player_id = len(players)
-    init_x, init_y = (200, 500) if player_id == 0 else (700, 500)
+    init_x, init_y = (PLAYER_ONE_PADDLE_INIT_X, PLAYER_ONE_PADDLE_INIT_Y) if player_id == 0 else (PLAYER_TWO_PADDLE_INIT_X, PLAYER_TWO_PADDLE_INIT_Y)
     players[player_id] = Player(websocket, player_id, init_x, init_y)
 
     # Main game loop
