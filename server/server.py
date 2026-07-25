@@ -127,7 +127,8 @@ async def handle_client(websocket: websockets.ServerConnection):
     global players
 
     player_id = len(players)
-    init_x, init_y = (PLAYER_ONE_PADDLE_INIT_X, PLAYER_ONE_PADDLE_INIT_Y) if player_id == 0 else (PLAYER_TWO_PADDLE_INIT_X, PLAYER_TWO_PADDLE_INIT_Y)
+    init_x, init_y = (PLAYER_ONE_PADDLE_INIT_X, PLAYER_ONE_PADDLE_INIT_Y) if player_id == 0 else \
+                     (PLAYER_TWO_PADDLE_INIT_X, PLAYER_TWO_PADDLE_INIT_Y)
     players[player_id] = Player(websocket, player_id, init_x, init_y)
 
     # Main game loop

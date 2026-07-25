@@ -139,11 +139,6 @@ class PlayState(State):
 
         # draw back button
         self.backButton.draw(screen, self.font)
-        if not self.ready:
-            # show waiting overlay while still rendering the local paddle
-            label = self.large_font.render("Waiting for opponent...", True, (220, 220, 220))
-            rect = label.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
-            screen.blit(label, rect)
 
     def draw_center_line(self, screen):
         for y in range(0, SCREEN_HEIGHT, 30):
