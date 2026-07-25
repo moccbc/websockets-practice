@@ -2,7 +2,7 @@ import pygame
 import queue
 from client.ui.button import Button
 from common import messages
-from common.messages import Move, PaddlePosition, BallPosition, ScoreUpdate
+from common.messages import Move, ScoreUpdate, BallObject, PaddleObject
 from common.messages import GameReady
 from client.states.state import State
 
@@ -13,6 +13,38 @@ PADDLE_HEIGHT = 100
 PADDLE_SPEED = 300
 BALL_RADIUS = 8
 
+# TODO: Move this to the UI directory
+class PaddleUI():
+    def __init__(self, x=100, y=100, height=100, width=100):
+        self.x = x
+        self.y = y
+        self.width = width 
+        self.height = height
+
+    def update(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, (255, 255, 255), (self.x, self.y, self.width, self.height))
+
+# TODO: Move this to the UI directory
+class BallUI():
+    def __init__(self, x, y, radius):
+        self.x = x
+        self.y = y
+        self.radius = radius
+
+    def update(self, x, y, radius):
+        self.x = x
+        self.y = y
+        self.radius = radius
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, (255, 255, 255), (int(self.x), int(self.y)), self.radius)
+
 class PlayState(State):
     def __init__(self, game):
         super().__init__(game)
@@ -20,15 +52,22 @@ class PlayState(State):
         self.large_font = pygame.font.SysFont(None, 48)
         self.local_up = False
         self.local_down = False
+
+        self.player_id = self.game.player_id
+
+        self.player_paddle = PaddleUI()
+        self.opponent_paddle = PaddleUI()
+        self.ball = BallUI(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, BALL_RADIUS)
+
         self.paddle_x = 30
         self.paddle_y = (SCREEN_HEIGHT - PADDLE_HEIGHT) / 2
         self.opponent_paddle_x = SCREEN_WIDTH - 30 - PADDLE_WIDTH
         self.opponent_paddle_y = (SCREEN_HEIGHT - PADDLE_HEIGHT) / 2
         self.ball_x = SCREEN_WIDTH / 2
         self.ball_y = SCREEN_HEIGHT / 2
+
         self.score_left = 0
         self.score_right = 0
-        self.player_id = self.game.player_id
         # whether the match is ready (both players connected)
         self.ready = bool(getattr(self.game, 'local_test', False))
         # back/disconnect button
@@ -60,17 +99,16 @@ class PlayState(State):
         match message:
             case GameReady():
                 self.ready = True
-            case PaddlePosition(player_id, x, y):
+
+            case PaddleObject(player_id, x, y, width, height):
                 if player_id == self.player_id:
-                    self.paddle_x = x
-                    self.paddle_y = y
+                    self.player_paddle.update(x, y, width, height)
                 else:
-                    self.opponent_paddle_x = x
-                    self.opponent_paddle_y = y
-                pass
-            case BallPosition(x, y):
-                self.ball_x = x
-                self.ball_y = y
+                    self.opponent_paddle.update(x, y, width, height)
+
+            case BallObject(x, y, radius):
+                self.ball.update(x, y, radius)
+
             case ScoreUpdate(score_left, score_right):
                 self.score_left = score_left
                 self.score_right = score_right
@@ -80,7 +118,6 @@ class PlayState(State):
 
                 self.game.change_state(MenuState(self.game))
                 return
-
 
     def update(self, dt):
         # Handle messages sent to server for this tick
@@ -92,11 +129,14 @@ class PlayState(State):
     def draw(self, screen):
         screen.fill((20, 20, 40))
         self.draw_center_line(screen)
-        pygame.draw.rect(screen, (255, 255, 255), (self.paddle_x, self.paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT))
-        pygame.draw.rect(screen, (255, 255, 255), (self.opponent_paddle_x, self.opponent_paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT))
-        pygame.draw.circle(screen, (255, 255, 255), (int(self.ball_x), int(self.ball_y)), BALL_RADIUS)
+
+        self.player_paddle.draw(screen)
+        self.opponent_paddle.draw(screen)
+        self.ball.draw(screen)
+
         self.draw_scores(screen)
         self.draw_status(screen)
+
         # draw back button
         self.backButton.draw(screen, self.font)
         if not self.ready:

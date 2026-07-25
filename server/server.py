@@ -4,13 +4,17 @@ import time
 import websockets
 
 from common import messages
-from common.messages import Move, Join, GameReady, JoinResponse, PaddlePosition, BallPosition, ScoreUpdate
+from common.messages import Move, Join, GameReady, JoinResponse, ScoreUpdate, BallObject, PaddleObject
 
 PLAYER_PADDLE_SPEED = 1
 BALL_SPEED = 75
 GAME_SPEED = 1/30
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
+
+PADDLE_WIDTH = 10
+PADDLE_HEIGHT = 100
+
 BALL_RADIUS = 8
 
 """
@@ -27,7 +31,6 @@ class Player:
         self.y = y
         
 players: dict[int, Player] = {}
-
 
 def reset_ball():
     ball_x = SCREEN_WIDTH / 2
@@ -79,21 +82,17 @@ async def game_loop():
             score_right,
         )
 
-        
-
         for player_id, player in players.items():
             # First, update score if applicable
             score_message = messages.encode(ScoreUpdate(score_left, score_right))
             await player.ws.send(score_message)
 
-            ball_position_message = messages.encode(
-                        BallPosition(ball_x, ball_y))
-            await player.ws.send(ball_position_message)
+            await player.ws.send(messages.encode(
+                BallObject(ball_x, ball_y, BALL_RADIUS)))
 
             for player_id2, player2 in players.items():
-                paddle_position_message = messages.encode(
-                        PaddlePosition(player_id, player.x, player.y))
-                await player2.ws.send(paddle_position_message)
+                await player2.ws.send(messages.encode(
+                    PaddleObject(player_id, player.x, player.y, PADDLE_WIDTH, PADDLE_HEIGHT)))
 
         # This is needed so that the game_loop and the async for loop in handle_client can share
         # the resources so that handle_client can actually send and receive stuff to and from 

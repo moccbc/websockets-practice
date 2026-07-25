@@ -1,2 +1,4 @@
 pygame==2.6.1
+typing_extensions==4.16.0
 websockets==16.0
+

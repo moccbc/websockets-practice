@@ -2,6 +2,7 @@ import json
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Any, ClassVar, Dict, Type
+from typing_extensions import deprecated
 
 MESSAGES = {}
 
@@ -47,18 +48,21 @@ class JoinResponse:
 class GameReady:
     pass
 
-@message("paddle_position")
+@message("paddle")
 @dataclass(frozen=True)
-class PaddlePosition:
+class PaddleObject:
     player_id: int
     x: float
     y: float
+    width: int 
+    height: int 
 
-@message("ball_position")
+@message("ball")
 @dataclass(frozen=True)
-class BallPosition:
+class BallObject:
     x: float
     y: float
+    radius: float
 
 @message("score_update")
 @dataclass(frozen=True)
@@ -66,7 +70,7 @@ class ScoreUpdate:
     score_left: int
     score_right: int
 
-Message = Join | JoinResponse | Move | GameReady | PaddlePosition | BallPosition | ScoreUpdate
+Message = Join | JoinResponse | Move | GameReady | ScoreUpdate | PaddleObject | BallObject
 
 def encode(msg: Message):
     try:
