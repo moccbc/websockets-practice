@@ -85,12 +85,8 @@ class PlayState(State):
     def update(self, dt):
         # Handle messages sent to server for this tick
         
-        #if self.game.connection is None:
-        #    return
-        
         if self.local_down or self.local_up:
-            direction = self.local_up - self.local_down
-            #message = messages.encode(Move(self.player_id, direction))
+            direction = self.local_down - self.local_up
             self.game.network_client.send(Move(self.player_id, direction))
 
     def draw(self, screen):

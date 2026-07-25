@@ -6,7 +6,7 @@ import websockets
 from common import messages
 from common.messages import Move, Join, GameReady, JoinResponse, PaddlePosition, BallPosition, ScoreUpdate
 
-PLAYER_PADDLE_SPEED = 0.5
+PLAYER_PADDLE_SPEED = 1
 BALL_SPEED = 75
 GAME_SPEED = 1/30
 SCREEN_WIDTH = 800
@@ -40,22 +40,25 @@ def reset_ball():
         if magnitude > 0:
             return ball_x, ball_y, (dx / magnitude, dy / magnitude)
 
-
 def advance_ball(ball_x, ball_y, ball_direction, score_left, score_right):
     ball_x += ball_direction[0] * BALL_SPEED * GAME_SPEED
     ball_y += ball_direction[1] * BALL_SPEED * GAME_SPEED
 
+    # When the ball is out of bounds (OOB) of the top of the screen
     if ball_y - BALL_RADIUS <= 0:
         ball_y = BALL_RADIUS
         ball_direction = (ball_direction[0], -ball_direction[1])
+    # When the ball is OOB of the bottom of the screen
     elif ball_y + BALL_RADIUS >= SCREEN_HEIGHT:
         ball_y = SCREEN_HEIGHT - BALL_RADIUS
         ball_direction = (ball_direction[0], -ball_direction[1])
 
+    # When the ball is OOB of the left of the screen
     if ball_x - BALL_RADIUS <= 0:
         score_right += 1
         return (*reset_ball(), score_left, score_right)
-    if ball_x + BALL_RADIUS >= SCREEN_WIDTH:
+    # When the ball is OOB of the right of the screen
+    elif ball_x + BALL_RADIUS >= SCREEN_WIDTH:
         score_left += 1
         return (*reset_ball(), score_left, score_right)
 
@@ -86,13 +89,11 @@ async def game_loop():
             ball_position_message = messages.encode(
                         BallPosition(ball_x, ball_y))
             await player.ws.send(ball_position_message)
+
             for player_id2, player2 in players.items():
                 paddle_position_message = messages.encode(
                         PaddlePosition(player_id, player.x, player.y))
                 await player2.ws.send(paddle_position_message)
-
-                
-
 
         # This is needed so that the game_loop and the async for loop in handle_client can share
         # the resources so that handle_client can actually send and receive stuff to and from 
@@ -108,7 +109,7 @@ async def handle_client(websocket: websockets.ServerConnection):
 
     # Main game loop
     try:
-        # this line is equivalent to while True: message = await websocket.recv()
+        # this line is equivalent to "while True: message = await websocket.recv()"
         async for raw_message in websocket:
             message = messages.decode(raw_message)
 
@@ -121,7 +122,7 @@ async def handle_client(websocket: websockets.ServerConnection):
                         for player_id, player in players.items():
                             ready_message = messages.encode(GameReady())
                             await player.ws.send(ready_message)
-                        asyncio.create_task(game_loop())    
+                        asyncio.create_task(game_loop())
 
                 case Move(player_id, dy):
                     players[player_id].y += dy * PLAYER_PADDLE_SPEED
