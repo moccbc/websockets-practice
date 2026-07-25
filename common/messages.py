@@ -60,7 +60,13 @@ class BallPosition:
     x: float
     y: float
 
-Message = Join | JoinResponse | Move | GameReady | PaddlePosition | BallPosition
+@message("score_update")
+@dataclass(frozen=True)
+class ScoreUpdate:
+    score_left: int
+    score_right: int
+
+Message = Join | JoinResponse | Move | GameReady | PaddlePosition | BallPosition | ScoreUpdate
 
 def encode(msg: Message):
     try:

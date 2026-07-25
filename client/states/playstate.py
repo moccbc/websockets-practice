@@ -2,7 +2,7 @@ import pygame
 import queue
 from client.ui.button import Button
 from common import messages
-from common.messages import Move, PaddlePosition, BallPosition
+from common.messages import Move, PaddlePosition, BallPosition, ScoreUpdate
 from common.messages import GameReady
 from client.states.state import State
 
@@ -71,6 +71,9 @@ class PlayState(State):
             case BallPosition(x, y):
                 self.ball_x = x
                 self.ball_y = y
+            case ScoreUpdate(score_left, score_right):
+                self.score_left = score_left
+                self.score_right = score_right
 
             case Exception():
                 from client.states.menustate import MenuState
