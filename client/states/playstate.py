@@ -59,13 +59,6 @@ class PlayState(State):
         self.opponent_paddle = PaddleUI()
         self.ball = BallUI(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, BALL_RADIUS)
 
-        self.paddle_x = 30
-        self.paddle_y = (SCREEN_HEIGHT - PADDLE_HEIGHT) / 2
-        self.opponent_paddle_x = SCREEN_WIDTH - 30 - PADDLE_WIDTH
-        self.opponent_paddle_y = (SCREEN_HEIGHT - PADDLE_HEIGHT) / 2
-        self.ball_x = SCREEN_WIDTH / 2
-        self.ball_y = SCREEN_HEIGHT / 2
-
         self.score_left = 0
         self.score_right = 0
         # whether the match is ready (both players connected)
