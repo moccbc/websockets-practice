@@ -1,6 +1,8 @@
 import pygame
 import queue
 from client.ui.button import Button
+from client.ui.paddle import PaddleUI
+from client.ui.ball import BallUI
 from common import messages
 from common.messages import MoveMessage, ScoreUpdateMessage, BallObjectMessage, PaddleObjectMessage
 from common.messages import GameReadyMessage
@@ -12,38 +14,6 @@ PADDLE_WIDTH = 10
 PADDLE_HEIGHT = 100
 PADDLE_SPEED = 300
 BALL_RADIUS = 8
-
-# TODO: Move this to the UI directory
-class PaddleUI():
-    def __init__(self, x=100, y=100, height=100, width=100):
-        self.x = x
-        self.y = y
-        self.width = width 
-        self.height = height
-
-    def update(self, x, y, width, height):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-
-    def draw(self, screen):
-        pygame.draw.rect(screen, (255, 255, 255), (self.x, self.y, self.width, self.height))
-
-# TODO: Move this to the UI directory
-class BallUI():
-    def __init__(self, x, y, radius):
-        self.x = x
-        self.y = y
-        self.radius = radius
-
-    def update(self, x, y, radius):
-        self.x = x
-        self.y = y
-        self.radius = radius
-
-    def draw(self, screen):
-        pygame.draw.circle(screen, (255, 255, 255), (int(self.x), int(self.y)), self.radius)
 
 class PlayState(State):
     def __init__(self, game):
