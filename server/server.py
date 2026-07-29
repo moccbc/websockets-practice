@@ -91,7 +91,6 @@ def advance_ball(ball_x, ball_y, ball_direction, score_left, score_right, player
     return ball_x, ball_y, ball_direction, score_left, score_right
 
 def advance_paddle(player_id, dy):
-    # Check collision with screen top
     if (dy < 0 and 0 <= players[player_id].y) or (dy > 0 and players[player_id].y + PADDLE_HEIGHT <= SCREEN_HEIGHT):
         return players[player_id].y + dy * PLAYER_PADDLE_SPEED
     return players[player_id].y
@@ -154,7 +153,6 @@ async def handle_client(websocket: websockets.ServerConnection):
                         asyncio.create_task(game_loop())
 
                 case MoveMessage(player_id, dy):
-                    #players[player_id].y += dy * PLAYER_PADDLE_SPEED
                     players[player_id].y = advance_paddle(player_id, dy)
 
     finally:
