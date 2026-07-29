@@ -28,29 +28,29 @@ def message(tag):
 # Goes from client -> server
 @message("join")
 @dataclass
-class Join:
+class JoinMessage:
     pass
 
 @message("move")
 @dataclass
-class Move:
+class MoveMessage:
     player_id: int
     y: int
 
 # Goes from server -> client
 @message("join_response")
 @dataclass
-class JoinResponse:
+class JoinResponseMessage:
     player_id: int
 
 @message("game_ready")
 @dataclass
-class GameReady:
+class GameReadyMessage:
     pass
 
 @message("paddle")
 @dataclass(frozen=True)
-class PaddleObject:
+class PaddleObjectMessage:
     player_id: int
     x: float
     y: float
@@ -59,18 +59,18 @@ class PaddleObject:
 
 @message("ball")
 @dataclass(frozen=True)
-class BallObject:
+class BallObjectMessage:
     x: float
     y: float
     radius: float
 
 @message("score_update")
 @dataclass(frozen=True)
-class ScoreUpdate:
+class ScoreUpdateMessage:
     score_left: int
     score_right: int
 
-Message = Join | JoinResponse | Move | GameReady | ScoreUpdate | PaddleObject | BallObject
+Message = JoinMessage | JoinResponseMessage | MoveMessage | GameReadyMessage | ScoreUpdateMessage | PaddleObjectMessage | BallObjectMessage
 
 def encode(msg: Message):
     try:

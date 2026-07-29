@@ -1,7 +1,7 @@
 import pygame
 from client.states.state import State
 from client.states.playstate import PlayState
-from common.messages import GameReady
+from common.messages import GameReadyMessage
 
 class WaitingState(State):
     def __init__(self, game):
@@ -11,7 +11,7 @@ class WaitingState(State):
 
     def handle_message(self, message):
         match message:
-            case GameReady():
+            case GameReadyMessage():
                 self.game.change_state(PlayState(self.game))
 
     def draw(self, screen):

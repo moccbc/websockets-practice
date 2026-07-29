@@ -7,7 +7,7 @@ from client.states.playstate import PlayState
 from client.states.waitingstate import WaitingState
 from client.ui.button import Button
 from common import messages
-from common.messages import Join, JoinResponse
+from common.messages import JoinMessage, JoinResponseMessage
 
 class MenuState(State):
     def __init__(self, game):
@@ -19,7 +19,7 @@ class MenuState(State):
 
     def handle_message(self, message):
         match message:
-            case JoinResponse(player_id):
+            case JoinResponseMessage(player_id):
                 self.game.player_id = player_id
                 self.game.change_state(WaitingState(self.game))
 
@@ -39,8 +39,8 @@ class MenuState(State):
     def connect_to_server(self):
         try:
             self.game.network_client.start_network_receiver()
-            # send Join to the server
-            self.game.network_client.send(Join())
+            # send JoinMessage to the server
+            self.game.network_client.send(JoinMessage())
         except Exception as exc:
             # show a friendly message on screen
             self.error_message = f"Connect failed: {exc}"

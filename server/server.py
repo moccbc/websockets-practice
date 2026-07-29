@@ -4,7 +4,7 @@ import time
 import websockets
 
 from common import messages
-from common.messages import Move, Join, GameReady, JoinResponse, ScoreUpdate, BallObject, PaddleObject
+from common.messages import MoveMessage, JoinMessage, GameReadyMessage, JoinResponseMessage, ScoreUpdateMessage, BallObjectMessage, PaddleObjectMessage
 
 PLAYER_PADDLE_SPEED = 2
 BALL_SPEED = 75
@@ -108,15 +108,15 @@ async def game_loop():
             )
 
             # First, update score if applicable
-            score_message = messages.encode(ScoreUpdate(score_left, score_right))
+            score_message = messages.encode(ScoreUpdateMessage(score_left, score_right))
             await player.ws.send(score_message)
 
             await player.ws.send(messages.encode(
-                BallObject(ball_x, ball_y, BALL_RADIUS)))
+                BallObjectMessage(ball_x, ball_y, BALL_RADIUS)))
 
             for player_id2, player2 in players.items():
                 await player2.ws.send(messages.encode(
-                    PaddleObject(player_id, player.x, player.y, PADDLE_WIDTH, PADDLE_HEIGHT)))
+                    PaddleObjectMessage(player_id, player.x, player.y, PADDLE_WIDTH, PADDLE_HEIGHT)))
 
         # This is needed so that the game_loop and the async for loop in handle_client can share
         # the resources so that handle_client can actually send and receive stuff to and from 
@@ -138,17 +138,17 @@ async def handle_client(websocket: websockets.ServerConnection):
             message = messages.decode(raw_message)
 
             match message:
-                case Join():
-                    await websocket.send(messages.encode(JoinResponse(player_id)))
+                case JoinMessage():
+                    await websocket.send(messages.encode(JoinResponseMessage(player_id)))
 
                     if len(players) == 2:
                         print(players)
                         for player_id, player in players.items():
-                            ready_message = messages.encode(GameReady())
+                            ready_message = messages.encode(GameReadyMessage())
                             await player.ws.send(ready_message)
                         asyncio.create_task(game_loop())
 
-                case Move(player_id, dy):
+                case MoveMessage(player_id, dy):
                     players[player_id].y += dy * PLAYER_PADDLE_SPEED
 
     finally:

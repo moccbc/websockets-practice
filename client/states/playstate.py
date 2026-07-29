@@ -2,8 +2,8 @@ import pygame
 import queue
 from client.ui.button import Button
 from common import messages
-from common.messages import Move, ScoreUpdate, BallObject, PaddleObject
-from common.messages import GameReady
+from common.messages import MoveMessage, ScoreUpdateMessage, BallObjectMessage, PaddleObjectMessage
+from common.messages import GameReadyMessage
 from client.states.state import State
 
 SCREEN_WIDTH = 800
@@ -90,19 +90,19 @@ class PlayState(State):
 
     def handle_message(self, message):
         match message:
-            case GameReady():
+            case GameReadyMessage():
                 self.ready = True
 
-            case PaddleObject(player_id, x, y, width, height):
+            case PaddleObjectMessage(player_id, x, y, width, height):
                 if player_id == self.player_id:
                     self.player_paddle.update(x, y, width, height)
                 else:
                     self.opponent_paddle.update(x, y, width, height)
 
-            case BallObject(x, y, radius):
+            case BallObjectMessage(x, y, radius):
                 self.ball.update(x, y, radius)
 
-            case ScoreUpdate(score_left, score_right):
+            case ScoreUpdateMessage(score_left, score_right):
                 self.score_left = score_left
                 self.score_right = score_right
 
@@ -117,7 +117,7 @@ class PlayState(State):
         
         if self.local_down or self.local_up:
             direction = self.local_down - self.local_up
-            self.game.network_client.send(Move(self.player_id, direction))
+            self.game.network_client.send(MoveMessage(self.player_id, direction))
 
     def draw(self, screen):
         screen.fill((20, 20, 40))

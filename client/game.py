@@ -14,6 +14,7 @@ class Game:
         self.running = True
         self.state = None
         self.network_client = NetworkClient("ws://localhost:32231")
+        #self.network_client = NetworkClient("ws://10.10.0.1:32231")
         self.player_id = 1
         self.local_test = False
 
