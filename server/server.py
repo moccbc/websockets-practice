@@ -4,7 +4,10 @@ import time
 import websockets
 
 from common import messages
-from common.messages import MoveMessage, JoinMessage, GameReadyMessage, JoinResponseMessage, ScoreUpdateMessage, BallObjectMessage, PaddleObjectMessage
+from common.messages import JoinMessage, GameReadyMessage, JoinResponseMessage, ScoreUpdateMessage, BallObjectMessage, PaddleObjectMessage, MoveUpMessage, MoveDownMessage
+
+HOST = "0.0.0.0"
+PORT = 32231
 
 PLAYER_PADDLE_SPEED = 2
 BALL_SPEED = 75
@@ -152,8 +155,11 @@ async def handle_client(websocket: websockets.ServerConnection):
                             await player.ws.send(ready_message)
                         asyncio.create_task(game_loop())
 
-                case MoveMessage(player_id, dy):
-                    players[player_id].y = advance_paddle(player_id, dy)
+                case MoveUpMessage():
+                    players[player_id].y = advance_paddle(player_id, -1)
+
+                case MoveDownMessage():
+                    players[player_id].y = advance_paddle(player_id, 1)
 
     finally:
         players.pop(player_id)
@@ -164,8 +170,8 @@ async def start_game():
     players = {}
 
 async def main():
-    async with websockets.serve(handle_client, "localhost", 32231):
-        print("Server started")
+    async with websockets.serve(handle_client, HOST, PORT):
+        print(f"Server started on {HOST}:{PORT}")
         await asyncio.Future() # runs server
 
 

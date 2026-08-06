@@ -4,8 +4,8 @@ from client.ui.button import Button
 from client.ui.paddle import PaddleUI
 from client.ui.ball import BallUI
 from common import messages
-from common.messages import MoveMessage, ScoreUpdateMessage, BallObjectMessage, PaddleObjectMessage
-from common.messages import GameReadyMessage
+from common.messages import ScoreUpdateMessage, BallObjectMessage, PaddleObjectMessage, \
+        GameReadyMessage, MoveUpMessage, MoveDownMessage
 from client.states.state import State
 
 SCREEN_WIDTH = 800
@@ -85,9 +85,11 @@ class PlayState(State):
     def update(self, dt):
         # Handle messages sent to server for this tick
         
-        if self.local_down or self.local_up:
-            direction = self.local_down - self.local_up
-            self.game.network_client.send(MoveMessage(self.player_id, direction))
+        if self.local_down:
+            self.game.network_client.send(MoveDownMessage())
+
+        if self.local_up:
+            self.game.network_client.send(MoveUpMessage())
 
     def draw(self, screen):
         screen.fill((20, 20, 40))

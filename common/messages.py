@@ -31,11 +31,15 @@ def message(tag):
 class JoinMessage:
     pass
 
-@message("move")
+@message("move_up")
 @dataclass
-class MoveMessage:
-    player_id: int
-    y: int
+class MoveUpMessage:
+    pass
+
+@message("move_down")
+@dataclass
+class MoveDownMessage:
+    pass
 
 # Goes from server -> client
 @message("join_response")
@@ -70,7 +74,8 @@ class ScoreUpdateMessage:
     score_left: int
     score_right: int
 
-Message = JoinMessage | JoinResponseMessage | MoveMessage | GameReadyMessage | ScoreUpdateMessage | PaddleObjectMessage | BallObjectMessage
+Message = JoinMessage | JoinResponseMessage | GameReadyMessage | ScoreUpdateMessage | \
+        PaddleObjectMessage | BallObjectMessage | MoveUpMessage | MoveDownMessage
 
 def encode(msg: Message):
     try:
